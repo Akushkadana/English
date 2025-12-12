@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Тест: {{ category.name }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {% for q in questions %}
+    <div class="card mb-4">
+        <div class="card-header">
+            Вопрос {{ forloop.counter }}: {{ q.english }}
+        </div>
+        <div class="card-body">
+            {% for option in q.options %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="question_{{ q.id }}" value="{{ option }}" id="opt{{ forloop.parentloop.counter }}{{ forloop.counter }}" required>
+                <label class="form-check-label" for="opt{{ forloop.parentloop.counter }}{{ forloop.counter }}">{{ option }}</label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-lg">Завершить тест</button>
+</form>
+{% endblock %}

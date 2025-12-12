@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="my-4 text-center" >{{ category.name }}  </h1>
+
+<a href="{% url 'vocabulary:home' %}" class="btn btn-secondary mb-3">← На главную</a>
+<div class="mb-4">
+    <a href="{% url 'vocabulary:export_pdf' category.slug %}" class="btn btn-danger btn-lg">
+        📄 Скачать PDF с карточками
+    </a>
+</div>
+<div class="row">
+    {% for word in words %}
+    <div class="col-md-4 mb-2">
+        <div class="flip-card">
+            <div class="flip-card-inner">
+                <div class="flip-card-front">
+                    {% if word.image %}
+                        <img src="{{ word.image.url }}" style="max-height:200px;">
+                    {% endif %}
+                    <h3>{{ word.english }}</h3>
+                    {% if word.transcription %}<p>[{{ word.transcription }}]</p>{% endif %}
+                </div>
+                <div class="flip-card-back">
+                    <h3>{{ word.russian }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <form method="post" action="{% url 'vocabulary:learn_word' word.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" name="action" value="learned" class="btn btn-success btn-sm">Выучил</button>
+                <button type="submit" name="action" value="repeat" class="btn btn-warning btn-sm">Повторить</button>
+            </form>
+        </div>
+    </div>
+
+    {% endfor %}
+</div>
+{% endblock %}

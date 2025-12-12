@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Личный кабинет</h1>
+<div class="alert alert-success">
+    Вы выучили <strong>{{ learned_count }}</strong> из {{ total_words }} слов!
+</div>
+<h3>Последние тесты</h3>
+<ul class="list-group">
+    {% for r in results %}
+    <li class="list-group-item">{{ r.created_at|date:"d.m.Y H:i" }} — {{ r.score }}/{{ r.total }} ({{ r.category }})</li>
+    {% empty %}
+    <li class="list-group-item">Тестов пока нет</li>
+    {% endfor %}
+</ul>
+{% endblock %}

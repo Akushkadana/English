@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-center my-5">Выберите категорию</h1>
+<div class="row">
+    {% for cat in categories %}
+    <div class="col-md-4 mb-4">
+        <div class="card text-center">
+            {% if cat.icon %}
+                <img src="{{ cat.icon.url }}" class="card-img-top" style="height:200px; object-fit:cover;">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ cat.name }}</h5>
+                <a href="{% url 'vocabulary:category_detail' cat.slug %}" class="btn btn-primary">Учить</a>
+                <a href="{% url 'vocabulary:quiz' cat.slug %}" class="btn btn-success ms-2">Тест</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center">Категорий пока нет. Зайдите в админку и добавьте!</p>
+    {% endfor %}
+</div>
+{% endblock %}

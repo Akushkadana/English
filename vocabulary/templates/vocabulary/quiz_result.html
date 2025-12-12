@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="text-center my-5">
+    <h1>Результат теста</h1>
+    <h2 class="display-4 text-success">{{ score }} из {{ total }}</h2>
+    <a href="{% url 'vocabulary:home' %}" class="btn btn-primary btn-lg mt-4">На главную</a>
+</div>
+{% endblock %}

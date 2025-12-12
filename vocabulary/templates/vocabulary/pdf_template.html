@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ category.name }} — карточки</title>
+</head>
+<body>
+    <h1 style="text-align:center; color:#1976d2;">{{ category.name }}</h1>
+    <p style="text-align:center; color:#666;">Карточки для печати и вырезания</p>
+
+    {% for word in words %}
+        <!-- Лицевая сторона -->
+        <div class="card">
+            <div class="front">
+               {% if word.image %}
+    <img src="{{ request.build_absolute_uri }}{{ word.image.url }}" alt="{{ word.english }}">
+{% else %}
+    <div style="height:170px; width:90%; background:#ddd; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+        <span style="font-size:60px; color:#aaa;">?</span>
+    </div>
+{% endif %}
+                <h2>{{ word.english }}</h2>
+                {% if word.transcription %}<p class="transcription">[{{ word.transcription }}]</p>{% endif %}
+            </div>
+        </div>
+
+        <!-- Обратная сторона -->
+        <div class="card">
+            <div class="back">
+                <h2>{{ word.russian }}</h2>
+                <p style="margin-top:20px; font-size:18px; color:#2e7d32;">{{ word.english }}</p>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div style="page-break-before: always;"></div>
+    <p style="text-align:center; color:#999; margin-top:50px;">
+        Сгенерировано EnglishCards • {{ "now"|date:"d.m.Y H:i" }}
+    </p>
+</body>
+</html>
