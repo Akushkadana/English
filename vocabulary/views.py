@@ -1,14 +1,18 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.staticfiles import finders
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.utils import timezone
-from xhtml2pdf import pisa
-from io import BytesIO
+from django.conf import settings
+from django.contrib.staticfiles import finders
 
 from .models import Category, Word, UserProgress, QuizResult
+
 import random
+import os
+from io import BytesIO
+from xhtml2pdf import pisa  # оставляем, если хочешь использовать xhtml2pdf
+
 
 def home(request):
     categories = Category.objects.all()
@@ -99,29 +103,26 @@ def profile(request):
     })
 
 
-# ЭКСПОРТ В PDF
-from xhtml2pdf import pisa
-from django.conf import settings
-import os
-
+# ЭКСПОРТ В PDF — ИСПРАВЛЕННАЯ ВЕРСИЯ
 def link_callback(uri, rel):
     """
-    Фикс для загрузки изображений из media и static
+    Конвертирует URI в абсолютный путь для изображений из static и media
     """
-    # Для static файлов
     if uri.startswith(settings.STATIC_URL):
         path = finders.find(uri.replace(settings.STATIC_URL, "", 1))
         if path:
             return path
-    # Для media файлов
+    
     if uri.startswith(settings.MEDIA_URL):
-        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, "").lstrip('/'))
+        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, "", 1).lstrip('/'))
         if os.path.isfile(path):
             return path
-    # Если полный URL (http) — оставляем
+    
     if uri.startswith("http"):
         return uri
-    raise Exception(f"Файл не найден: {uri}")
+    
+    return uri  # если не нашли — возвращаем как есть
+
 
 @login_required
 def export_pdf(request, slug):
@@ -129,15 +130,20 @@ def export_pdf(request, slug):
     words = category.words.all()
 
     template = get_template('vocabulary/pdf_template.html')
-    html = template.render({'category': category, 'words': words, 'request': request})
+    context = {
+        'category': category,
+        'words': words,
+        'request': request,  # важно для абсолютных путей
+    }
+    html = template.render(context)
 
     result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result, encoding="UTF-8", link_callback=link_callback)
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result, encoding='UTF-8', link_callback=link_callback)
 
     if pdf.err:
-        return HttpResponse(f"Ошибка PDF: {pdf.err}", status=500)
+        return HttpResponse(f"Ошибка при создании PDF: {pdf.err}", status=500)
 
     response = HttpResponse(result.getvalue(), content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{category.name}_cards.pdf"'
     return response
-    return HttpResponse("Ошибка создания PDF", status=500)
+    # Убрали лишний return — он был недостижим
